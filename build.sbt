@@ -24,3 +24,9 @@ sourceGenerators in Compile <+= buildInfo
 buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion)
 
 buildInfoPackage := "cinsk.hello"
+
+// scalacOptions += "-deprecation"
+
+// To prevent sbt.TrapExitSecurityException raised while '--help' is used,
+// use following statement.
+fork in (run) := true
