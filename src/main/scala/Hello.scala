@@ -1,4 +1,4 @@
-package cinsk.hello
+package cinsk
 
 import java.io.File
 import java.io._
@@ -18,7 +18,7 @@ class Klass(file: Option[File]) {
   println("C CTOR")
 
   def lift[T](x: => T): Option[T] = try { Some(x) }
-                                    catch { case _ => println("exception!"); None }
+                                    catch { case _: Throwable => println("exception!"); None }
 
 
   val props = file match {
