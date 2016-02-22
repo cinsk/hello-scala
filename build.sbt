@@ -12,7 +12,7 @@ mainClass in (Compile, run) := Some("cinsk.Hello")
 // libraryDependencies += "org.scala-tools.testing" % "specs_2.10" % "1.6.9"
 
 // See https://github.com/scopt/scopt
-libraryDependencies += "com.github.scopt" %% "scopt" % "3.3.0"
+//libraryDependencies += "com.github.scopt" %% "scopt" % "3.3.0"
 
 resolvers += Resolver.sonatypeRepo("public")
 

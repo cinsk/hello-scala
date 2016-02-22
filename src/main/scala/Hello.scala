@@ -1,100 +1,64 @@
 package cinsk
 
-import java.io.File
-import java.io._
-
-import java.util.Properties
-import scopt._
-
-case class OptionConfig(out: File = new File("."),
-                        verbose: Boolean = false,
-                        version: Boolean = false,
-                        debug: Boolean = false,
-                        properties: String = "",
-                        args: Seq[String] = Seq(),
-                        kwargs: Map[String, String] = Map())
-
-class Klass(file: Option[File]) {
-  println("C CTOR")
-
-  def lift[T](x: => T): Option[T] = try { Some(x) }
-                                    catch { case _: Throwable => println("exception!"); None }
-
-
-  val props = file match {
-      case Some(n) => {
-        val is = lift(new BufferedInputStream(new FileInputStream(n)))
-        val p = new Properties
-        is.map { x =>
-          println("loading...")
-          p.load(x)
-        }
-        p
-      }
-      case _ => new Properties
-    }
-
-  def this() { this(None) }
-
-  def size = props.size
-}
-
-
+import scala.annotation.tailrec
+import Benchmark._
 
 object Hello {
-  val versionString = BuildInfo.version
-  val programName = BuildInfo.name
+  def main(args: Array[String]): Unit = {
+    pause
 
-  def showVersionAndExit {
-    println(s"$programName version $versionString")
-    System.exit(0)
+    println(s"p1: ${p1}");
+    println(s"p2: ${p2}");
+
+    val mineTime = time {
+      println(Prime.primes.takeWhile(_ <= 10000).last)
+    }
+
+    pause("Press any key to quit")
   }
 
-  def liftFilter[A](a: => A)(f: A => Boolean) =
-    try {
-      val v = a
-      if (f(v)) Some(v)
-      else None
-    }
-    catch {
-      case _: Throwable => None
-    }
+  def p1() = {
+    Range(1, 1000).flatMap(x => {
+      if (x % 3 == 0 || x % 5 == 0)
+        List(x)
+      else
+        None;
+    }).reduceLeft((a, b) => a + b)
+  }
 
-  def main(args: Array[String]) {
-    val optParser = new scopt.OptionParser[OptionConfig](programName) {
-        head("Short description of the program")
-        help("help") text("display this help and exit")
-        opt[Unit]("verbose") action { (_, c) =>
-          c.copy(verbose = true) } text("verbose is a flag")
-        opt[Unit]("version") action { (_, c) =>
-          showVersionAndExit
-          c.copy(version = true)
-        } text("output version information and exit")
-        opt[String]('P', "properties") required() valueName("<file>") action {
-          (x, c) => c.copy(properties = x) } text("properties file")
-        arg[String]("ARG...") unbounded() optional() action { (x, c) =>
-          c.copy(args = c.args :+ x) } text("Optional unbounded args")
-        note("")
+  def p2() = {
+    @tailrec
+    def fibo(first: Long, second: Long, sum: Long): Long = {
+      if (second >= 4000000)
+        sum;
+      else {
+        val next = first + second;
+        fibo(second, next, if (next % 2 == 0) sum + next else sum);
       }
+    }
+  }
 
-    val c: OptionConfig = optParser.parse(args, OptionConfig()).orNull
-    if (c == null) {
-      System.err.println("parse error")
-      System.exit(1)
+  def p3() = {
+    val input = 600851475143L;
+    def larestPrimeFactor(i: Long) = {
+      Range(2, math.sqrt(i).toInt).filter(Prime.is(_)).filter(i % _ == 0).last
+    }
+  }
+
+  def fibos(n: Int, indent: Int = 0): (BigInt, BigInt) = {
+    println(s"${"  " * indent}fibo($n)")
+      n match {
+        case 1 => (1, 0)
+        case _ =>
+          val (fn, fn_1) = fibos(n / 2, indent + 1)
+          val l = (2 * fn_1 + fn) * fn
+          val r = fn * fn + fn_1 * fn_1
+          if (n % 2 == 0)
+            (l, r)
+          else
+            (l + r, l)
+      }
     }
 
-    if (c.verbose)
-      println("verbose on")
-
-    for (a <- c.args)
-      println(s"arg: $a")
-
-    val k = new Klass { liftFilter(c.properties) { _.length > 0 } }
-
-    //propFile.map(x => println("OPTION!"))
-    //val k = new Klass(propFile)
-    println("size of klass: " + k.size)
-    println("args: " + c.args)
-  }
 }
 
